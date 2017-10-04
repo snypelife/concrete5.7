@@ -1,19 +1,23 @@
-FROM chriswayg/apache-php
-MAINTAINER Christian Wagner chriswayg@gmail.com
+FROM snypelife/apache-php
+LABEL maintainer="brettmrogerson@gmail.com"
 
 # This image provides Concrete5.7 at root of site
+
+# Add Let’s Encrypt Client respository so we can have TLS
+RUN sudo add-apt-repository ppa:certbot/certbot
 
 # Install pre-requisites for Concrete5 & nano for editing conf files
 RUN apt-get update && \
       DEBIAN_FRONTEND=noninteractive apt-get -y install \
-      php5-curl \
-      php5-gd \
-      php5-mysql \
+      php7.0-curl \
+      php7.0-gd \
+      php7.0-mysql \
       unzip \
       wget \
       patch \
-      nano && \
-    apt-get clean && rm -r /var/lib/apt/lists/*
+      vim && \
+      python-certbot-apache && \
+      apt-get clean && rm -r /var/lib/apt/lists/*
     
 # Find latest download details at https://www.concrete5.org/get-started
 # - for newer version: change Concrete5 version# & download url & md5
@@ -30,7 +34,7 @@ RUN perl -i.bak -0pe 's/<Directory \/var\/www\/>\n\tOptions Indexes FollowSymLin
     cp -r /etc/apache2 /usr/local/etc/apache2 && \
     cd /usr/local/src && \ 
     wget --no-verbose $C5_URL -O concrete5.zip && \
-    echo "$C5_MD5  concrete5.zip" | md5sum -c - && \
+    echo "$C5_MD5 concrete5.zip" | md5sum -c - && \
     unzip -qq concrete5.zip && \
     rm -v concrete5.zip && \
     rm -v /var/www/html/index.html
